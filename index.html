@@ -3,116 +3,207 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>InstaSave — Free Instagram Video & Reel Downloader</title>
-<meta name="description" content="Download Instagram videos, Reels, and photos for free. Paste a link, get the file. No login, no app, no watermark.">
+<title>Image Compressor - Free Online Photo Optimizer</title>
+<meta name="description" content="Compress JPG, PNG, and WEBP images for free. Reduce image file size without losing quality. 100% secure, files are processed in your browser.">
 <style>
-  :root{--bg:#0f1115;--card:#181b22;--border:#262b36;--txt:#e8eaed;--muted:#9aa3b2;--accent:#e1306c;--accent2:#f77737}
+  :root{--bg:#f4f6f8;--card:#ffffff;--txt:#333;--muted:#777;--accent:#0078ff;--accent-hover:#005ce6;--border:#ddd}
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6}
-  .wrap{max-width:640px;margin:0 auto;padding:48px 20px 80px}
-  h1{font-size:2rem;margin:0 0 8px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{color:var(--muted);margin:0 0 28px}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  input{flex:1 1 280px;min-width:0;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:15px;outline:none}
-  input:focus{border-color:var(--accent)}
-  button{padding:14px 22px;border:0;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-  button:disabled{opacity:.6;cursor:wait}
-  #msg{margin:16px 0;color:var(--muted);font-size:14px;min-height:20px}
-  #msg.err{color:#ff6b6b}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:20px;display:none}
-  .card.show{display:block}
-  video,img.preview{width:100%;border-radius:10px;background:#000;display:block}
-  .actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
-  a.dl{display:inline-block;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-  a.alt{background:var(--card);border:1px solid var(--border);color:var(--txt)}
-  section{margin-top:48px}
-  h2{font-size:1.15rem;margin:0 0 10px}
-  details{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
-  summary{cursor:pointer;font-weight:600}
-  details p{color:var(--muted);margin:8px 0 0;font-size:14px}
-  footer{margin-top:48px;color:var(--muted);font-size:12px;text-align:center;border-top:1px solid var(--border);padding-top:20px}
+  .header{background:var(--card);border-bottom:1px solid var(--border);padding:15px 20px;display:flex;align-items:center;justify-content:center;}
+  .header h1{margin:0;font-size:1.5rem;color:var(--accent);font-weight:800;letter-spacing:-0.5px;}
+  .wrap{max-width:750px;margin:40px auto;padding:0 20px}
+  .card{background:var(--card);border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.05);padding:40px 30px;text-align:center;border:1px solid var(--border)}
+  h2{margin-top:0;font-size:2rem;letter-spacing:-1px}
+  
+  .drop-zone{border:2px dashed #b0b8c1;border-radius:10px;padding:50px 20px;margin:20px 0;cursor:pointer;transition:0.2s;background:#fafbfc}
+  .drop-zone:hover{border-color:var(--accent);background:#f0f7ff}
+  .drop-zone.active{border-color:var(--accent);background:#e5f1ff}
+  
+  .btn{background:var(--accent);color:white;border:none;padding:16px 32px;font-size:1.1rem;font-weight:bold;border-radius:8px;cursor:pointer;width:100%;transition:0.2s;display:none;margin-top:15px}
+  .btn:hover{background:var(--accent-hover)}
+  
+  .preview-area{display:none;margin-top:30px;text-align:left}
+  .preview-img{max-width:100%;max-height:300px;border-radius:8px;margin-bottom:15px;display:block;margin-left:auto;margin-right:auto}
+  .stats{display:flex;justify-content:space-between;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;font-weight:bold}
+  .stats span.original{color:#e74c3c}
+  .stats span.compressed{color:#2ecc71}
+  
+  .controls{margin-bottom:20px;display:none}
+  .controls label{display:block;margin-bottom:5px;font-weight:bold;font-size:0.9rem}
+  input[type="range"]{width:100%;cursor:pointer;accent-color:var(--accent)}
+  
+  .features{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:left}
+  .feature{background:var(--card);padding:20px;border-radius:10px;border:1px solid var(--border)}
+  .feature h3{margin:0 0 10px 0;font-size:1.1rem}
+  .feature p{margin:0;font-size:0.9rem;color:var(--muted)}
+  @media (max-width:600px){.features{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+
+<div class="header">
+  <h1>Image Compressor</h1>
+</div>
+
 <div class="wrap">
-  <h1>InstaSave</h1>
-  <p class="sub">Paste an Instagram Reel, video, or photo link. Download it in one click.</p>
+  <div class="card">
+    <h2>Compress your images</h2>
+    <p style="color:var(--muted);margin-bottom:30px">Reduce the file size of your JPG, PNG, or WEBP images without losing visible quality.</p>
+    
+    <!-- Hidden File Input -->
+    <input type="file" id="fileInput" accept="image/jpeg, image/png, image/webp" style="display:none">
+    
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:10px"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+      <p style="margin:0;font-weight:bold">Select an image</p>
+      <p style="margin:5px 0 0;font-size:0.85rem;color:var(--muted)">or drag and drop it here</p>
+    </div>
 
-  <div class="row">
-    <input id="url" type="url" placeholder="https://www.instagram.com/reel/..." autocomplete="off">
-    <button id="btn" onclick="go()">Download</button>
+    <!-- Compression Controls -->
+    <div class="controls" id="controls">
+      <label for="qualitySlider">Compression Quality: <span id="qualityValue">80%</span></label>
+      <input type="range" id="qualitySlider" min="10" max="100" value="80">
+    </div>
+
+    <!-- Preview & Stats -->
+    <div class="preview-area" id="previewArea">
+      <img id="previewImage" class="preview-img" alt="Preview">
+      
+      <div class="stats">
+        <div>Original: <span class="original" id="originalSize">0 KB</span></div>
+        <div>Compressed: <span class="compressed" id="compressedSize">0 KB</span></div>
+      </div>
+
+      <button class="btn" id="downloadBtn" style="display:block" onclick="downloadImage()">Download Compressed Image</button>
+    </div>
+    
   </div>
-  <div id="msg"></div>
 
-  <div class="card" id="card">
-    <div id="mediaBox"></div>
-    <div class="actions">
-      <a id="dl" class="dl" download>Save file</a>
-      <a id="orig" class="dl alt" target="_blank" rel="noopener">Open original</a>
+  <div class="features">
+    <div class="feature">
+      <h3>100% Private</h3>
+      <p>Your images are compressed directly in your browser. They are never uploaded to a server, ensuring complete privacy.</p>
+    </div>
+    <div class="feature">
+      <h3>No Limits</h3>
+      <p>Compress as many images as you want. There are no daily limits, no watermarks, and no hidden fees.</p>
     </div>
   </div>
-
-  <section>
-    <h2>How it works</h2>
-    <details><summary>Is it free?</summary><p>Yes. Paste a public Instagram link, and the tool fetches the media URL through a proxy and gives you a direct download.</p></details>
-    <details><summary>Why do some links fail?</summary><p>Private accounts, age-restricted posts, and deleted content can't be fetched. Instagram also changes its page format periodically — when it does, the extractor needs updating.</p></details>
-    <details><summary>Do you store the videos?</summary><p>No. The request is proxied on the fly and never written to disk.</p></details>
-    <details><summary>Does it work on mobile?</summary><p>Yes — it's responsive. The "Save file" button triggers your phone's download prompt.</p></details>
-  </section>
-
-  <footer>Only download content you own or have permission to use. Respect Instagram's Terms of Service and copyright law.</footer>
 </div>
 
 <script>
-// ⬇️ CHANGE THIS to your deployed Cloudflare Worker URL
-const API = 'https://reelgrab-api.reelgrab.workers.dev';
+  const fileInput = document.getElementById('fileInput');
+  const dropZone = document.getElementById('dropZone');
+  const controls = document.getElementById('controls');
+  const qualitySlider = document.getElementById('qualitySlider');
+  const qualityValue = document.getElementById('qualityValue');
+  const previewArea = document.getElementById('previewArea');
+  const previewImage = document.getElementById('previewImage');
+  const originalSizeText = document.getElementById('originalSize');
+  const compressedSizeText = document.getElementById('compressedSize');
+  const downloadBtn = document.getElementById('downloadBtn');
 
-const $ = id => document.getElementById(id);
+  let currentFile = null;
+  let compressedBlob = null;
 
-async function go(){
-  const input = $('url').value.trim();
-  const btn = $('btn'), msg = $('msg'), card = $('card');
-  card.classList.remove('show');
-  msg.className = '';
-  if (!input){ msg.textContent = 'Paste an Instagram link first.'; return; }
+  // UI Events
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('active'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('active'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('active');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  });
 
-  btn.disabled = true;
-  msg.textContent = 'Fetching…';
+  qualitySlider.addEventListener('input', (e) => {
+    qualityValue.textContent = e.target.value + '%';
+    if (currentFile) compressImage(currentFile, e.target.value / 100);
+  });
 
-  try {
-    const r = await fetch(`${API}/?url=${encodeURIComponent(input)}`);
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Request failed');
-
-    // Build preview
-    const box = $('mediaBox');
-    box.innerHTML = '';
-    if (data.type === 'video'){
-      const v = document.createElement('video');
-      v.src = data.media; v.controls = true; v.playsInline = true;
-      box.appendChild(v);
-    } else {
-      const img = document.createElement('img');
-      img.src = data.media; img.className = 'preview'; img.alt = 'Instagram photo';
-      box.appendChild(img);
-    }
-
-    $('dl').href = data.media;
-    $('dl').setAttribute('download', data.type === 'video' ? 'instagram-video.mp4' : 'instagram-photo.jpg');
-    $('orig').href = data.original;
-
-    card.classList.add('show');
-    msg.textContent = 'Ready.';
-  } catch (e) {
-    msg.className = 'err';
-    msg.textContent = e.message;
-  } finally {
-    btn.disabled = false;
+  // Format bytes to KB/MB
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 KB';
+    const k = 1024, sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
-}
 
-// Enter key support
-$('url').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (JPG, PNG, WEBP).');
+      return;
+    }
+    currentFile = file;
+    originalSizeText.textContent = formatBytes(file.size);
+    
+    // Read the file to show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImage.src = e.target.result;
+      dropZone.style.display = 'none';
+      controls.style.display = 'block';
+      previewArea.style.display = 'block';
+      
+      // Initial compression
+      compressImage(file, qualitySlider.value / 100);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function compressImage(file, quality) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        // Compress to JPEG
+        canvas.toBlob((blob) => {
+          compressedBlob = blob;
+          
+          // If the compressed file is larger (rare, but possible with small PNGs), use original
+          if (blob.size > file.size && quality === 1) {
+            compressedSizeText.textContent = formatBytes(file.size);
+            downloadBtn.textContent = "Image is already optimized!";
+            downloadBtn.style.background = "#777";
+          } else {
+            compressedSizeText.textContent = formatBytes(blob.size);
+            downloadBtn.textContent = "Download Compressed Image";
+            downloadBtn.style.background = "var(--accent)";
+          }
+          
+        }, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function downloadImage() {
+    if (!compressedBlob) return;
+    
+    const url = URL.createObjectURL(compressedBlob);
+    const a = document.createElement('a');
+    // Keep original name but change extension to jpg
+    const originalName = currentFile.name.split('.').slice(0, -1).join('.');
+    a.download = `${originalName}-compressed.jpg`;
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 </script>
 </body>
 </html>
