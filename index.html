@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InstaSave — Free Instagram Video & Reel Downloader</title>
+<meta name="description" content="Download Instagram videos, Reels, and photos for free. Paste a link, get the file. No login, no app, no watermark.">
+<style>
+  :root{--bg:#0f1115;--card:#181b22;--border:#262b36;--txt:#e8eaed;--muted:#9aa3b2;--accent:#e1306c;--accent2:#f77737}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6}
+  .wrap{max-width:640px;margin:0 auto;padding:48px 20px 80px}
+  h1{font-size:2rem;margin:0 0 8px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);margin:0 0 28px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  input{flex:1 1 280px;min-width:0;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:15px;outline:none}
+  input:focus{border-color:var(--accent)}
+  button{padding:14px 22px;border:0;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  button:disabled{opacity:.6;cursor:wait}
+  #msg{margin:16px 0;color:var(--muted);font-size:14px;min-height:20px}
+  #msg.err{color:#ff6b6b}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:20px;display:none}
+  .card.show{display:block}
+  video,img.preview{width:100%;border-radius:10px;background:#000;display:block}
+  .actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+  a.dl{display:inline-block;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  a.alt{background:var(--card);border:1px solid var(--border);color:var(--txt)}
+  section{margin-top:48px}
+  h2{font-size:1.15rem;margin:0 0 10px}
+  details{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  summary{cursor:pointer;font-weight:600}
+  details p{color:var(--muted);margin:8px 0 0;font-size:14px}
+  footer{margin-top:48px;color:var(--muted);font-size:12px;text-align:center;border-top:1px solid var(--border);padding-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>InstaSave</h1>
+  <p class="sub">Paste an Instagram Reel, video, or photo link. Download it in one click.</p>
+
+  <div class="row">
+    <input id="url" type="url" placeholder="https://www.instagram.com/reel/..." autocomplete="off">
+    <button id="btn" onclick="go()">Download</button>
+  </div>
+  <div id="msg"></div>
+
+  <div class="card" id="card">
+    <div id="mediaBox"></div>
+    <div class="actions">
+      <a id="dl" class="dl" download>Save file</a>
+      <a id="orig" class="dl alt" target="_blank" rel="noopener">Open original</a>
+    </div>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <details><summary>Is it free?</summary><p>Yes. Paste a public Instagram link, and the tool fetches the media URL through a proxy and gives you a direct download.</p></details>
+    <details><summary>Why do some links fail?</summary><p>Private accounts, age-restricted posts, and deleted content can't be fetched. Instagram also changes its page format periodically — when it does, the extractor needs updating.</p></details>
+    <details><summary>Do you store the videos?</summary><p>No. The request is proxied on the fly and never written to disk.</p></details>
+    <details><summary>Does it work on mobile?</summary><p>Yes — it's responsive. The "Save file" button triggers your phone's download prompt.</p></details>
+  </section>
+
+  <footer>Only download content you own or have permission to use. Respect Instagram's Terms of Service and copyright law.</footer>
+</div>
+
+<script>
+// ⬇️ CHANGE THIS to your deployed Cloudflare Worker URL
+const API = 'https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev';
+
+const $ = id => document.getElementById(id);
+
+async function go(){
+  const input = $('url').value.trim();
+  const btn = $('btn'), msg = $('msg'), card = $('card');
+  card.classList.remove('show');
+  msg.className = '';
+  if (!input){ msg.textContent = 'Paste an Instagram link first.'; return; }
+
+  btn.disabled = true;
+  msg.textContent = 'Fetching…';
+
+  try {
+    const r = await fetch(`${API}/?url=${encodeURIComponent(input)}`);
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Request failed');
+
+    // Build preview
+    const box = $('mediaBox');
+    box.innerHTML = '';
+    if (data.type === 'video'){
+      const v = document.createElement('video');
+      v.src = data.media; v.controls = true; v.playsInline = true;
+      box.appendChild(v);
+    } else {
+      const img = document.createElement('img');
+      img.src = data.media; img.className = 'preview'; img.alt = 'Instagram photo';
+      box.appendChild(img);
+    }
+
+    $('dl').href = data.media;
+    $('dl').setAttribute('download', data.type === 'video' ? 'instagram-video.mp4' : 'instagram-photo.jpg');
+    $('orig').href = data.original;
+
+    card.classList.add('show');
+    msg.textContent = 'Ready.';
+  } catch (e) {
+    msg.className = 'err';
+    msg.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Enter key support
+$('url').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+</script>
+</body>
+</html>
